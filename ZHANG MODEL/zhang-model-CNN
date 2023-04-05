@@ -1,0 +1,87 @@
+class Zhang_CNN(Module):   
+    def __init__(self):
+        super(Net, self).__init__()
+
+        #BUILD 10-LAYER MODEL AS DESCRIBED IN ZHANG ET AL. ARTICLE ON MS CLASSIFICATION
+
+        self.PReLU = nn.PReLU(inplace=True) # can be reused
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2) # can be reused
+        self.conv_1= nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1) # need to figure out what layers to use here...
+        self.conv_2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
+        self.conv_3 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+        self.conv_4 = nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1),
+        self.conv_5 = nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+        self.conv_6 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1),
+        self.conv_7 = nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1),
+  
+        #two classifications: 'MS', 'other'
+        self.dropout_1 = nn.Dropout(0.25)
+        self.FCL_1 = nn.Linear()
+        self.dropout_2 = nn.Dropout()
+        self.FCL_2 = nn.Linear()
+        self.dropout_3 = nn.Dropout()
+        self.FCL_3 = nn.Linear(,2)#or 3 if you want to make "MS", "healthy", "other"
+
+
+            #256, 256
+            nn.Flatten(),
+            nn.Linear(82944,1024),
+            nn.ReLU(),
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.Linear(512,6)
+    # Defining the forward pass    
+    def forward(self, x):
+    #CONV LAYERS ---------------------------------------------------------------
+      #1ST conv layer
+      logits = self.conv_1(x)
+      logits = self.PreLU(logits)
+      logits = self.pool(logits)
+
+      #2nd conv layer
+      logits = self.conv_2(logits)
+      logits = self.PreLU(logits)
+      logits = self.pool(logits)
+
+      #3rd conv layer
+      logits = self.conv_2(logits)
+      logits = self.PreLU(logits)
+      logits = self.pool(logits)
+
+      #4th conv layer
+      logits = self.conv_2(logits)
+      logits = self.PreLU(logits)
+      logits = self.pool(logits)
+
+      #5th conv layer
+      logits = self.conv_2(logits)
+      logits = self.PreLU(logits)
+      logits = self.pool(logits)
+
+      #6th conv layer
+      logits = self.conv_2(logits)
+      logits = self.PreLU(logits)
+      logits = self.pool(logits)
+
+      #7th conv layer
+      logits = self.conv_2(logits)
+      logits = self.PreLU(logits)
+      logits = self.pool(logits)
+
+    #DROPOUT + FCL LAYERS ------------------------------------------------------
+      #1st dropout + FCL layer
+      logits = self.dropout_1(logits)
+      logits = self.FCL_1(logits)
+
+      #2nd dropout + FCL layer
+      logits = self.dropout_2(logits)
+      logits = self.FCL_2(logits)
+
+      #3rd dropout FCL layer
+      logits = self.dropout_3(logits)
+      logits = self.FCL_3(logits)
+
+    #SOFTMAX--------------------------------------------------------------------
+      logits = F.log_softmax(logits, dim=1)
+
+      return logits
