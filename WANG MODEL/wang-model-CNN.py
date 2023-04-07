@@ -4,7 +4,7 @@ class Wang_CNN(Module):
 
         #BUILD 10-LAYER MODEL AS DESCRIBED IN ZHANG ET AL. ARTICLE ON MS CLASSIFICATION
         self.ReLU = nn.ReLU(inplace=True) # can be reused
-        self.BN = nn.BatchNorm2d(2) #NEED TO FIGURE OUT NUM FEATURES #can be reused
+        self.BN_1 = nn.BatchNorm2d(2) #NEED TO FIGURE OUT NUM FEATURES #can be reused # batch_size, num channels=1, H , W #add 
         self.pool = nn.MaxPool2d(kernel_size=3, stride=2, padding ='same') # change to stochastic pool
         self.conv_1= nn.Conv2d(1, 8, kernel_size=3, stride=2, padding='same') 
         self.conv_2 = nn.Conv2d(8, 8, kernel_size=3, stride=2, padding='same')
