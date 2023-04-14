@@ -62,7 +62,7 @@ def validate_cnn(
     model: nn.Module, loader: DataLoader, device: torch.device
 ) -> Tuple[float, Dict[str, Any]]:
     """
-    Validate the FFNN model.
+    -Validate the CNN model
     Return values:
         1. the average validation loss
         2. validation metrics such as accuracy and F1 score
@@ -93,7 +93,7 @@ def validate_cnn(
 
 def train_val_loop_cnn(hyperparams: Dict[str, Any], model_type= String) -> None:
     """
-    Train and validate the FFNN model for a number of epochs.
+    Train and validate the CNN model for a number of epochs.
     """
 
     # Create the model
@@ -116,7 +116,7 @@ def train_val_loop_cnn(hyperparams: Dict[str, Any], model_type= String) -> None:
         print("Epoch #%d" % i)
 
         print("Training..")
-        loss_train, metrics_train = train_ffnn(
+        loss_train, metrics_train = train_cnn(
             model, loader_train, optimizer, device, silent=True
         )
         print("Training loss: ", loss_train)
@@ -125,12 +125,10 @@ def train_val_loop_cnn(hyperparams: Dict[str, Any], model_type= String) -> None:
             print("\t", k, ": ", v)
 
         print("Validating..")
-        loss_val, metrics_val = validate_ffnn(model, loader_val, device)
+        loss_val, metrics_val = validate_cnn(model, loader_val, device)
         print("Validation loss: ", loss_val)
         print("Validation metrics:")
         for k, v in metrics_val.items():
             print("\t", k, ": ", v)
 
     print("Done!")
-
-train_and

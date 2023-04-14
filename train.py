@@ -1,34 +1,41 @@
-from torchvision import datasets
-import torchvision.transforms as transforms
-from torch.utils.data.sampler import SubsetRandomSampler
+import torch
+import torch.nn as nn
 import torch.optim as optim
+import torch.nn.functional as F
+from torch.utils.data import Dataset, DataLoader, random_split
+import numpy as np
+from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
+import re
+from collections import Counter
+from typing import List, Tuple, Dict, Optional, Any
+from read_data import read_data_file # allows to load in datasets
 import zhang-model-CNN
 import wang-model-CNN
 
 #### adapted from https://shonit2096.medium.com/cnn-on-cifar10-data-set-using-pytorch-34be87e09844
-#num subprocesses to use for data loading
-num_workers = 0
-#how many samples per batch to load
-batch_size = 20 #may need to increase to get better accuracy
-#percentage of training set to use as validation
-valid_size = 0.2 
 
+model = zhang-model-CNN() #can change to wang-model-CNN
 
-# convert data to a normalized torch.FloatTensor
-transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ])
+datapath = #where is it in cluster? 
+batch_size = 20 #raise to improve
+percent_train = 80
+num_workers = 4
+data = read_data(datapath)
+train_size = percent_train*len(data)
+test_size = (len(data) - train_size)/2
 
-#split dataset into train and test
-train_data = 
-test_data = 
+#resize images then transform to tensor
+data = ImageFolder(train_data, transform = transforms.Compose([transforms.Resize((150, 150)), transforms.ToTensor()]))
+
+#split into train and test
+train_data, test_data = random_split(data, [train_size, (test_size*2)])
+valid_data = random_split(test_data, [test_size, test_size])
 
 #obtain training indices that will be used for validation
 num_train = len(train_data)
 indices = list(range(num_train))
 np.random.shuffle(indices)
-split = int(np.floor(valid_size *num_train)) #finds index to stop at to get the validation set from dataset.
+split = int(np.floor(test_size *num_train)) #finds index to stop at to get the validation set from dataset.
 train_idx, valid_idx = indices[split:], indices[:split]
 
 #define samplers for obtaining training and validation batches
@@ -44,8 +51,6 @@ test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size,
     num_workers=num_workers)
 
 classes = ['MS', 'other']
-
-model = zhang-model-CNN()
 
 #specify loss function
 criterion = nn.CrossEntropyLoss()
