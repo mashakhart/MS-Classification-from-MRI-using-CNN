@@ -1,9 +1,14 @@
-class Zhang_CNN(Module):   
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
+from torch.utils.data import Dataset, DataLoader, random_split
+
+class Zhang_CNN(nn.Module):   
     def __init__(self):
-        super(Net, self).__init__()
+        super(Zhang_CNN, self).__init__()
 
         #BUILD 10-LAYER MODEL AS DESCRIBED IN ZHANG ET AL. ARTICLE ON MS CLASSIFICATION
-        self.PReLU = nn.PReLU(inplace=True) # can be reused
         self.pool = nn.MaxPool2d(kernel_size=3, stride=1, padding =1) # can be reused
         self.conv_1= nn.Conv2d(1, 16, kernel_size=3, stride=3, padding=2) # need to figure out what layers to use here...
         self.conv_2 = nn.Conv2d(16, 32, kernel_size=3, stride=3, padding=2)
@@ -27,37 +32,37 @@ class Zhang_CNN(Module):
     #CONV LAYERS ---------------------------------------------------------------
       #1ST conv layer
       logits = self.conv_1(x)
-      logits = self.PreLU(logits)
+      logits = nn.PReLU(logits)
       logits = self.pool(logits)
 
       #2nd conv layer
       logits = self.conv_2(logits)
-      logits = self.PreLU(logits)
+      logits = nn.PReLU(logits)
       logits = self.pool(logits)
 
       #3rd conv layer
       logits = self.conv_2(logits)
-      logits = self.PreLU(logits)
+      logits = nn.PReLU(logits)
       logits = self.pool(logits)
 
       #4th conv layer
       logits = self.conv_2(logits)
-      logits = self.PreLU(logits)
+      logits = nn.PReLU(logits)
       logits = self.pool(logits)
 
       #5th conv layer
       logits = self.conv_2(logits)
-      logits = self.PreLU(logits)
+      logits = nn.PReLU(logits)
       logits = self.pool(logits)
 
       #6th conv layer
       logits = self.conv_2(logits)
-      logits = self.PreLU(logits)
+      logits = nn.PReLU(logits)
       logits = self.pool(logits)
 
       #7th conv layer
       logits = self.conv_2(logits)
-      logits = self.PreLU(logits)
+      logits = nn.PReLU(logits)
       logits = self.pool(logits)
 
     #DROPOUT + FCL LAYERS ------------------------------------------------------

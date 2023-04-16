@@ -3,33 +3,37 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.data.sampler import SubsetRandomSampler
+import torchvision
+from torchvision import transforms
+from torchvision.datasets import ImageFolder
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 import re
 from collections import Counter
 from typing import List, Tuple, Dict, Optional, Any
-from read_data import read_data_file # allows to load in datasets
-import zhang-model-CNN
-import wang-model-CNN
+from wang_model_CNN import Wang_CNN
+from zhang_model_CNN import Zhang_CNN
 
 #### adapted from https://shonit2096.medium.com/cnn-on-cifar10-data-set-using-pytorch-34be87e09844
 
-model = zhang-model-CNN() #can change to wang-model-CNN
+model = Zhang_CNN() #can change to wang-model-CNN
 
-datapath = #where is it in cluster? 
+datapath = r'C:\Users\mkara\OneDrive\Desktop\exampe3' #where is it in cluster? 
 batch_size = 20 #raise to improve
-percent_train = 80
+percent_train = 0.80
 num_workers = 4
-data = read_data(datapath)
-train_size = percent_train*len(data)
-test_size = (len(data) - train_size)/2
 
+data = ImageFolder(datapath,transform = transforms.Compose([transforms.Resize((150,150)),transforms.ToTensor()]))
 #resize images then transform to tensor
-data = ImageFolder(train_data, transform = transforms.Compose([transforms.Resize((150, 150)), transforms.ToTensor()]))
+
+train_size = int(percent_train*len(data))
+test_size = int((len(data) - train_size)//2)
+valid_size = int(len(data)-train_size-test_size)
 
 #split into train and test
-train_data, test_data = random_split(data, [train_size, (test_size*2)])
-valid_data = random_split(test_data, [test_size, test_size])
+train_data, test_data = random_split(data, [train_size, (test_size+valid_size)])
+valid_data = random_split(test_data, [test_size, valid_size])
 
 #obtain training indices that will be used for validation
 num_train = len(train_data)
@@ -58,7 +62,7 @@ criterion = nn.CrossEntropyLoss()
 #specify optimizer
 optimizer = optim.SGD(model.parameters(), lr = 0.01)
 
-n_epochs = [*range(30)]
+n_epochs = 30
 train_losslist = []
 valid_loss_min = np.Inf 
 
