@@ -11,28 +11,31 @@ import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 import re
 from collections import Counter
+import cv2
+import matplotlib.pyplot as plt
 from typing import List, Tuple, Dict, Optional, Any
 from wang_model_CNN import Wang_CNN
 from zhang_model_CNN import Zhang_CNN
 
-#### adapted from https://shonit2096.medium.com/cnn-on-cifar10-data-set-using-pytorch-34be87e09844
 
+#### adapted from https://shonit2096.medium.com/cnn-on-cifar10-data-set-using-pytorch-34be87e09844
+#### and from https://towardsdatascience.com/how-to-apply-a-cnn-from-pytorch-to-your-images-18515416bba1
 model = Zhang_CNN() #can change to wang-model-CNN
 
-datapath = r'C:\Users\mkara\OneDrive\Desktop\exampe3' #where is it in cluster? 
-batch_size = 20 #raise to improve
+datapath = r'C:\Users\mkara\OneDrive\Desktop\exampe3' 
+batch_size = 30 #raise to improve
 percent_train = 0.80
-num_workers = 4
 
-data = ImageFolder(datapath,transform = transforms.Compose([transforms.Resize((150,150)),transforms.ToTensor()]))
+dataset = ImageFolder(datapath,transform = transforms.Compose([transforms.Resize((150,150)),transforms.ToTensor(),
+transforms.Grayscale(num_output_channels=1) ]))
 #resize images then transform to tensor
 
-train_size = int(percent_train*len(data))
-test_size = int((len(data) - train_size)//2)
-valid_size = int(len(data)-train_size-test_size)
+train_size = int(percent_train*len(dataset))
+test_size = int((len(dataset) - train_size)//2)
+valid_size = int(len(dataset)-train_size-test_size)
 
 #split into train and test
-train_data, test_data = random_split(data, [train_size, (test_size+valid_size)])
+train_data, test_data = random_split(dataset, [train_size, (test_size+valid_size)])
 valid_data = random_split(test_data, [test_size, valid_size])
 
 #obtain training indices that will be used for validation
@@ -48,11 +51,10 @@ valid_sampler = SubsetRandomSampler(valid_idx)
 
 #prepare data loader(combine dataset and sampler)
 train_loader = torch.utils.data.DataLoader(train_data, batch_size = batch_size,
-    sampler=train_sampler, num_workers=num_workers)
+    sampler=train_sampler)
 valid_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, 
-    sampler=valid_sampler, num_workers=num_workers)
-test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, 
-    num_workers=num_workers)
+    sampler=valid_sampler)
+test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size)
 
 classes = ['MS', 'other']
 
@@ -60,9 +62,9 @@ classes = ['MS', 'other']
 criterion = nn.CrossEntropyLoss()
 
 #specify optimizer
-optimizer = optim.SGD(model.parameters(), lr = 0.01)
+optimizer = optim.SGD(model.parameters(), lr = 0.01, momentum = 0.9)
 
-n_epochs = 30
+n_epochs = 5 #30
 train_losslist = []
 valid_loss_min = np.Inf 
 
@@ -99,7 +101,7 @@ for epoch in range(1, n_epochs +1):
         valid_loss))
         torch.save(model.state_dict(), 'good_model.pt')
         valid_loss_min = valid_loss
-plt.plot(n_epochs, train_losslist)
+plt.plot(np.arange(n_epochs), train_losslist)
 plt.xlabel("Epoch")
 plt.ylabel("Loss")
 plt.title("Performance of Model 1")
@@ -117,7 +119,6 @@ model.eval()
 
 # iterate over test data
 for data, target in test_loader:
-    
     # forward pass: compute predicted outputs by passing inputs to the model
     output = model(data)
     # calculate the batch loss
@@ -130,7 +131,10 @@ for data, target in test_loader:
     correct_tensor = pred.eq(target.data.view_as(pred))
     correct = np.squeeze(correct_tensor.numpy()) 
     # calculate test accuracy for each object class
-    for i in range(batch_size):
+    b = batch_size
+    if len(target.data) < batch_size:
+        b = len(target.data)
+    for i in range(b):
         label = target.data[i]
         class_correct[label] += correct[i].item()
         class_total[label] += 1
@@ -139,7 +143,7 @@ for data, target in test_loader:
 test_loss = test_loss/len(test_loader.dataset)
 print('Test Loss: {:.6f}\n'.format(test_loss))
 
-for i in range(10):
+for i in range(2):
     if class_total[i] > 0:
         print('Test Accuracy of %5s: %2d%% (%2d/%2d)' % (
             classes[i], 100 * class_correct[i] / class_total[i],
