@@ -2,15 +2,18 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, random_split
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
+import torchvision
+from torchvision import transforms
+from torchvision.datasets import ImageFolder
 from wang_model_CNN import Wang_CNN
 from zhang_model_CNN import Zhang_CNN
 
 
 #read images from dataset using ImageFolder, then split into test and train sets.
-def prepare_data(datapath, batch_size, percent_train)
+def prepare_data(datapath, batch_size, percent_train):
     dataset = ImageFolder(datapath,transform = transforms.Compose([transforms.Resize((150,150)),transforms.ToTensor(),
     transforms.Grayscale(num_output_channels=1) ]))
 
@@ -22,11 +25,11 @@ def prepare_data(datapath, batch_size, percent_train)
     return train_data, test_data
 
 #Creates DataLoaders for the train and test data
-def get_data_loaders(train_data, test_data)
+def get_data_loaders(train_data, test_data):
 
     #prepare data loader(combine dataset and sampler)
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size = batch_size)
-    test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size = batch_size, shuffle = True)
+    test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle = True)
 
     return train_loader, test_loader
 
@@ -90,7 +93,7 @@ def test_cnn(model, loader):
 #Runs the training and testing loops on the dataset
 def train_and_test(hyperparams, model_type, datapath, batch_size, percent_train):
 
-    if model_type = "Zhang":
+    if model_type == "Zhang":
         model = Zhang_CNN()
     else:
         model = Wang_CNN()
@@ -126,9 +129,9 @@ def train_and_test(hyperparams, model_type, datapath, batch_size, percent_train)
     print("Done!")
 
 
-hyperparams = {"epochs": 30, "learning rate":0.01, "momentum": 0.9}
-datapath = r'C:\Users\mkara\OneDrive\Desktop\exampe3' 
-batch_size = 30 #raise to improve
+hyperparams = {"epochs": 15, "learning rate":0.01, "momentum": 0.9}
+datapath = r'C:\Users\mkara\OneDrive\Desktop\IW-project-data' 
+batch_size = 10 #raise to improve
 percent_train = 0.80
 model_type = "Zhang"
 
