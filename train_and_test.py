@@ -2,15 +2,19 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, random_split
 import numpy as np
-from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
+from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, precision_score
+import torchvision
+from torchvision import transforms
+from torchvision.datasets import ImageFolder
 from wang_model_CNN import Wang_CNN
 from zhang_model_CNN import Zhang_CNN
+import matplotlib.pyplot as plt
 
 
 #read images from dataset using ImageFolder, then split into test and train sets.
-def prepare_data(datapath, batch_size, percent_train)
+def prepare_data(datapath, batch_size, percent_train):
     dataset = ImageFolder(datapath,transform = transforms.Compose([transforms.Resize((150,150)),transforms.ToTensor(),
     transforms.Grayscale(num_output_channels=1) ]))
 
@@ -22,11 +26,11 @@ def prepare_data(datapath, batch_size, percent_train)
     return train_data, test_data
 
 #Creates DataLoaders for the train and test data
-def get_data_loaders(train_data, test_data)
+def get_data_loaders(train_data, test_data):
 
     #prepare data loader(combine dataset and sampler)
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size = batch_size)
-    test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size = batch_size, shuffle = True)
+    test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle = True)
 
     return train_loader, test_loader
 
@@ -35,6 +39,7 @@ def eval_metrics(ground_truth, predictions):
     f1_scores = f1_score(ground_truth, predictions, average=None)
     return {
         "accuracy": accuracy_score(ground_truth, predictions),
+        "precision": precision_score(ground_truth, predictions),
         "f1": f1_scores,
         "average f1": np.mean(f1_scores),
         "confusion matrix": confusion_matrix(ground_truth, predictions),
@@ -88,12 +93,12 @@ def test_cnn(model, loader):
 
 
 #Runs the training and testing loops on the dataset
-def train_and_test(hyperparams, model_type, datapath, batch_size, percent_train):
+def train_and_test(hyperparams, model_type, datapath, batch_size, percent_train, num_classes):
 
-    if model_type = "Zhang":
-        model = Zhang_CNN()
+    if model_type == "Zhang":
+        model = Zhang_CNN(num_classes)
     else:
-        model = Wang_CNN()
+        model = Wang_CNN(num_classes)
 
     #Create the optimizer
     optimizer = optim.SGD(model.parameters(), lr=hyperparams['learning rate'], momentum = hyperparams['momentum'])
@@ -102,15 +107,19 @@ def train_and_test(hyperparams, model_type, datapath, batch_size, percent_train)
     train_data, test_data = prepare_data(datapath, batch_size, percent_train)
     loader_train, loader_test = get_data_loaders(train_data, test_data)
 
-    classes = ['MS', 'other']
-
     #Train and validate
+    train_losses = []
+    train_acc = []
+    train_prec = []
+    test_losses = []
+    test_acc = []
+    test_prec = []
+
     for i in range(hyperparams['epochs']):
         print("Epoch #%d" % i)
 
         print("Training..")
         loss_train, metrics_train = train_cnn(model, loader_train, optimizer, silent= True)
-
         print("Training loss: ", loss_train)
         print("Training metrics:")
         for k, v in metrics_train.items():
@@ -123,13 +132,69 @@ def train_and_test(hyperparams, model_type, datapath, batch_size, percent_train)
         for k, v in metrics_test.items():
             print("\t", k, ": ", v)
 
+        train_losses.append(loss_train)
+        test_losses.append(loss_test)
+        train_acc.append(metrics_train['accuracy'])
+        test_acc.append(metrics_test['accuracy'])
+        train_prec.append(metrics_train['precision'])
+        test_prec.append(metrics_test['precision'])
+
+
     print("Done!")
 
+    eval_dict = {"train losses": train_losses, "train accuracies": train_acc, "train precisions": train_prec,
+                "test losses": test_losses, "test accuracies": test_acc, "test precisions": test_prec}
+    return eval_dict
 
-hyperparams = {"epochs": 30, "learning rate":0.01, "momentum": 0.9}
-datapath = r'C:\Users\mkara\OneDrive\Desktop\exampe3' 
-batch_size = 30 #raise to improve
+def plot_loss(train_losses, test_losses):
+    plt.plot(train_losses, '-bx')
+    plt.plot(test_losses, '-rx')
+    plt.xlabel('epoch')
+    plt.ylabel('loss')
+    plt.legend(['Training', 'Testing'])
+    plt.title('Loss vs. No. of epochs')
+    plt.show()
+
+def plot_accuracies(train_accuracies, test_accuracies):
+    plt.plot(train_accuracies, '-bx')
+    plt.plot(test_accuracies, '-rx')
+    plt.xlabel('epoch')
+    plt.ylabel('accuracy')
+    plt.legend(['Training', 'Testing'])
+    plt.title('Accuracy vs. No. of epochs')
+    plt.show()
+
+def plot_precision(train_precisions, test_precisions):
+    plt.plot(train_precisions, '-bx')
+    plt.plot(test_precisions, '-rx')
+    plt.xlabel('epoch')
+    plt.ylabel('precision')
+    plt.legend(['Training', 'Testing'])
+    plt.title('Precision vs. No. of epochs')
+    plt.show()
+
+def get_datapath(type):
+    if type == 'MS vs healthy':
+        datapath = r'C:\Users\mkara\OneDrive\Desktop\MS and healthy' 
+        classes = ['healthy', 'MS']
+        num_classes = 2
+    elif type == 'MS vs other':
+        datapath = r'C:\Users\mkara\OneDrive\Desktop\MS and other' 
+        classes = ['MS-negative', 'MS-positive']
+        num_classes = 2
+    else: # if MS vs other conditions
+        datapath = r'C:\Users\mkara\OneDrive\Desktop\MS and conditions' 
+        classes = ['Alzheimers', 'Healthy', 'MS', 'Parkinsons', 'TBI']
+        num_classes = 5
+    return datapath, classes, num_classes
+
+hyperparams = {"epochs": 20, "learning rate":0.01, "momentum": 0.9} #15, 0.01
+datapath, classes, num_classes = get_datapath('MS vs healthy') 
+batch_size = 10 #raise to improve
 percent_train = 0.80
 model_type = "Zhang"
 
-train_and_test(hyperparams, model_type, datapath, batch_size, percent_train)
+eval_dict = train_and_test(hyperparams, model_type, datapath, batch_size, percent_train, num_classes)
+plot_loss(eval_dict['train losses'], eval_dict['test losses'])
+plot_accuracies(eval_dict['train accuracies'], eval_dict['test accuracies'])
+plot_precision(eval_dict['train precisions'], eval_dict['test precisions'])

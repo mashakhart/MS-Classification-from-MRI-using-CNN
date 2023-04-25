@@ -5,12 +5,12 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader, random_split
 
 class Wang_CNN(nn.Module):   
-    def __init__(self):
+    def __init__(self, num_classes):
         super(Wang_CNN, self).__init__()
 
         #BUILD 10-LAYER MODEL AS DESCRIBED IN ZHANG ET AL. ARTICLE ON MS CLASSIFICATION
         self.BN_1 = nn.BatchNorm2d(2)  
-        self.pool = nn.MaxPool2d(kernel_size=3, stride=2, padding ='same') # change to stochastic pool
+        self.pool = nn.MaxPool2d(kernel_size=3, stride=2, padding ='same') # change to stochastic pool if you can!
         self.conv_1= nn.Conv2d(1, 8, kernel_size=3, stride=2, padding='same') 
         self.conv_2 = nn.Conv2d(8, 8, kernel_size=3, stride=2, padding='same')
         self.conv_3 = nn.Conv2d(8, 16, kernel_size=3, stride=1, padding='same')
@@ -25,11 +25,11 @@ class Wang_CNN(nn.Module):
         #assuming that num_channels = in_channels, and num_filters = out_channels
 
         #two classifications: 'MS', 'other'
-        self.FCL_1 = nn.Linear(1024, 20) 
+        self.FCL_1 = nn.Linear(1024, 20, bias = True) 
         self.dropout_1 = nn.Dropout(0.5)
-        self.FCL_2 = nn.Linear(20, 10)
+        self.FCL_2 = nn.Linear(20, 10, bias = True)
         self.dropout_2 = nn.Dropout(0.5)
-        self.FCL_3 = nn.Linear(10,2)#or 3 if you want to make "MS", "healthy", "other"
+        self.FCL_3 = nn.Linear(10,num_classes, bias = True)#or 3 if you want to make "MS", "healthy", "other"
 
     # Defining the forward pass    
     def forward(self, x):

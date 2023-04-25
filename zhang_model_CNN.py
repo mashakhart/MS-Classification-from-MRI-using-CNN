@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader, random_split
 
 class Zhang_CNN(nn.Module):   
-    def __init__(self):
+    def __init__(self, num_classes):
         super(Zhang_CNN, self).__init__()
         #CHANGE RELU TO PRELU!!
         #BUILD 10-LAYER MODEL AS DESCRIBED IN ZHANG ET AL. ARTICLE ON MS CLASSIFICATION
@@ -21,11 +21,11 @@ class Zhang_CNN(nn.Module):
 
         #two classifications: 'MS', 'other'
         self.dropout_1 = nn.Dropout(0.4)
-        self.FCL_1 = nn.Linear(512, 500, bias = True) 
+        self.FCL_1 = nn.Linear(512, 500) 
         self.dropout_2 = nn.Dropout(0.5)
-        self.FCL_2 = nn.Linear(500, 100, bias = True)
+        self.FCL_2 = nn.Linear(500, 100)
         self.dropout_3 = nn.Dropout(0.5)
-        self.FCL_3 = nn.Linear(100,2, bias = True) #or 3 if you want to make "MS", "healthy", "other"
+        self.FCL_3 = nn.Linear(100, num_classes)
 
     # Defining the forward pass    
     def forward(self, x):
