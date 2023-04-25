@@ -4,11 +4,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader, random_split
 import numpy as np
-<<<<<<< HEAD:train_and_test.py
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, precision_score
-=======
-from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
->>>>>>> b0a5dcb9e24117f2102551ee7e2b440cdf8ee528:new_train.py
 import torchvision
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
