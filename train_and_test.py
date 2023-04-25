@@ -4,7 +4,11 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader, random_split
 import numpy as np
+<<<<<<< HEAD:train_and_test.py
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, precision_score
+=======
+from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
+>>>>>>> b0a5dcb9e24117f2102551ee7e2b440cdf8ee528:new_train.py
 import torchvision
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
@@ -188,9 +192,9 @@ def get_datapath(type):
         num_classes = 5
     return datapath, classes, num_classes
 
-hyperparams = {"epochs": 20, "learning rate":0.01, "momentum": 0.9} #15, 0.01
+hyperparams = {"epochs": 20, "learning rate":0.01, "momentum": 0.9} 
 datapath, classes, num_classes = get_datapath('MS vs healthy') 
-batch_size = 10 #raise to improve
+batch_size = 10 
 percent_train = 0.80
 model_type = "Zhang"
 
