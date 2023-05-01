@@ -214,10 +214,10 @@ def get_datapath(type):
     return datapath, classes, num_classes
 
 hyperparams = {"epochs": 15, "learning rate":0.01, "momentum": 0.9, "l2": 1e-6} 
-datapath, classes, num_classes = get_datapath('MS vs conditions') #can change to "MS vs healthy" or "MS vs conditions"
+datapath, classes, num_classes = get_datapath('MS vs other') #can change to "MS vs healthy" or "MS vs conditions"
 batch_size = 10 
 percent_train = 0.80
-model_type = "Medium" #change to "Simple" for the Simple_CNN, "Zhang" for the Zhang_CNN, and "Wang" for the Wang_CNN
+model_type = "Simple" #change to "Simple" for the Simple_CNN, "Zhang" for the Zhang_CNN, and "Wang" for the Wang_CNN
 
 eval_dict = train_and_test(hyperparams, model_type, datapath, batch_size, percent_train, num_classes)
 plot_loss(eval_dict['train losses'], eval_dict['test losses'])

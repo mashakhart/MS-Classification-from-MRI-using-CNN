@@ -15,11 +15,11 @@ def create_confusion_matrix(results, classes, title):
 classes = ["Alzheimer's", "Healthy", "MS", "Parkinson's", "TBI"] #can change based on what you run, but doesn't make sense to create for only two classes
                                                                  
 #taken from the train_and_test.py outputs
-results =  np.array([[1152,13,33,168,106],
-            [   6, 2029,  591,  690,  309],
-            [  33,  706, 2989,  452,  270],
-            [  76,  240,  268, 8402,  446],
-            [  88,  206,  305, 1452,  759]])
+results =  np.array([[ 322,   15,   10,   14 ,   1],
+                     [  14,  663,   67,  118,    1],
+                     [   7,  230,  873,   81,    1],
+                     [  41,  156,   92, 2028,   12],
+                     [  71,  145,   79,  253,  154]])
 
 graph = 'Medium' #can make Simple, Zhang, or Wang
 regularization = 'with' #can make 'without' if no l2
